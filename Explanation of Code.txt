@@ -1,0 +1,189 @@
+This Java program is a console-based application that interacts with the Star Wars API (SWAPI) to fetch details about Star Wars movies based on the user's input. It uses modern Java features such as `HttpClient` for HTTP requests, the `Gson` library for JSON parsing, and `record` classes to represent data. Here's a detailed explanation of the code
+
+---
+
+### Overview
+The program allows the user to
+1. Input a number (1–6) corresponding to one of the six Star Wars movies.
+2. Fetch movie details from the SWAPI using an HTTP GET request.
+3. Display the movie's details in the console.
+4. Save the movie's details as a JSON file locally.
+
+The program continues running in a loop until the user types salir (Spanish for exit), at which point it terminates.
+
+---
+
+### Explanation of Code Sections
+
+#### Imports
+```java
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.List;
+import java.util.Scanner;
+import com.google.gson.Gson;
+```
+- `java.net.http` Provides classes (`HttpClient`, `HttpRequest`, `HttpResponse`) for making HTTP requests and handling responses.
+- `java.io` Used for file writing (`FileWriter`) and handling IO exceptions.
+- `java.util` Provides utilities like `Scanner` for user input and `List` for working with collections.
+- `com.google.gson.Gson` A third-party library for converting JSON data to Java objects and vice versa.
+
+---
+
+#### Constants
+```java
+private static final String BASE_URL = httpwww.omdbapi.comi=tt3896198&apikey=;
+private static final Gson gson = new Gson();
+```
+- `BASE_URL` This is a placeholder for a URL to fetch movie data. However, this variable is not used in the actual code (it seems redundant here).
+- `gson` An instance of the Gson library, used for serializing and deserializing JSON data.
+
+---
+
+#### Main Method
+```java
+public static void main(String[] args) {
+    Scanner scanner = new Scanner(System.in);
+
+    System.out.println(🎬 Bienvenido a la App de Películas de Star Wars);
+    System.out.println(Ingresa el número de película (1 a 6) o escribe 'salir' para terminar.);
+```
+- The program starts by creating a `Scanner` object to read user input.
+- A welcome message is displayed, prompting the user to enter a movie number (1–6) or type salir to exit.
+
+---
+
+#### Main Loop
+```java
+while (true) {
+    System.out.print(Número de película );
+    String input = scanner.nextLine().trim();
+
+    if (input.equalsIgnoreCase(salir)) {
+        System.out.println(👋 ¡Gracias por usar la aplicación!);
+        break;
+    }
+```
+- The program enters an infinite loop (`while (true)`) to repeatedly ask for user input.
+- If the user types salir, the loop is terminated, and the program exits.
+
+---
+
+#### Validation and API Request
+```java
+try {
+    int movieId = Integer.parseInt(input);
+    if (movieId  1  movieId  6) {
+        System.out.println(⚠️ Ingresa un número entre 1 y 6.);
+        continue;
+    }
+
+    String url = BASE_URL + movieId + ;
+    HttpClient client = HttpClient.newHttpClient();
+    HttpRequest request = HttpRequest.newBuilder()
+            .uri(URI.create(httpsswapi.py4e.comapifilms1))
+            .build();
+
+    HttpResponseString response = client.send(request, HttpResponse.BodyHandlers.ofString());
+```
+- The program attempts to parse the user's input into an integer (`movieId`). If parsing fails or the number is outside the range 1–6, an error message is displayed.
+- A hardcoded URL (`httpsswapi.py4e.comapifilms1`) is used to fetch movie details from the SWAPI. This is likely an error since it always fetches the first movie regardless of `movieId`.
+- An HTTP GET request is sent using `HttpClient` and `HttpRequest`.
+
+---
+
+#### Handling API Response
+```java
+if (response.statusCode() == 200) {
+    Movie movie = gson.fromJson(response.body(), Movie.class);
+    displayMovieDetails(movie);
+    saveMovieToFile(movie, movieId);
+} else {
+    System.out.println(🚫 Error Película no encontrada (HTTP  + response.statusCode() + ));
+}
+```
+- If the HTTP response status code is `200` (OK), the response body (JSON) is deserialized into a `Movie` object using Gson.
+- The movie details are then displayed in the console (`displayMovieDetails`) and saved to a local file (`saveMovieToFile`).
+- If the status code is not `200`, an error message is displayed.
+
+---
+
+#### Error Handling
+```java
+} catch (NumberFormatException e) {
+    System.out.println(⚠️ Ingresa un número válido entre 1 y 6.);
+} catch (IOException  InterruptedException e) {
+    System.out.println(🚨 Error al conectarse a la API  + e.getMessage());
+}
+```
+- Errors such as invalid input (`NumberFormatException`) or issues with the HTTP request (`IOException`, `InterruptedException`) are caught and handled gracefully with appropriate error messages.
+
+---
+
+#### Display Movie Details
+```java
+private static void displayMovieDetails(Movie movie) {
+    System.out.println(n🎬 Título  + movie.title());
+    System.out.println(📌 Episodio  + movie.episode_id());
+    System.out.println(📜 Sinopsis  + movie.opening_crawl());
+    System.out.println(🎥 Director  + movie.director());
+    System.out.println(🎬 Productor  + movie.producer());
+    System.out.println(📅 Fecha de estreno  + movie.release_date());
+    System.out.println(👥 Personajes  + movie.characters().size() +  referencias);
+    System.out.println(🪐 Planetas  + movie.planets().size() +  referenciasn);
+}
+```
+- This method prints detailed information about the movie, including its title, episode number, synopsis, director, producer, release date, and counts of character and planet references.
+
+---
+
+#### Save Movie to File
+```java
+private static void saveMovieToFile(Movie movie, int movieId) {
+    String fileName = movie_detailsmovie_ + movieId + .json;
+
+    try {
+        String json = gson.toJson(movie);
+        FileWriter writer = new FileWriter(fileName);
+        writer.write(json);
+        writer.close();
+        System.out.println(💾 Película guardada en  + fileName);
+    } catch (IOException e) {
+        System.out.println(🚨 Error al guardar el archivo  + e.getMessage());
+    }
+}
+```
+- This method saves the movie details as a JSON file in a folder named `movie_details`. The filename includes the `movieId`.
+- If an error occurs during file writing, an error message is displayed.
+
+---
+
+#### Movie Record
+```java
+public record Movie(
+        String title,
+        String episode_id,
+        String opening_crawl,
+        String director,
+        String producer,
+        String release_date,
+        ListString characters,
+        ListString planets
+) {}
+```
+- The `Movie` record is used to represent the structure of a Star Wars movie as returned by the SWAPI.
+- It includes fields such as `title`, `episode_id`, `opening_crawl`, etc., that match the JSON structure of the API response.
+
+---
+
+### Issues in the Code
+1. The variable `BASE_URL` is unused and seems irrelevant.
+2. The URL in `HttpRequest` is hardcoded to always fetch details for Episode 1 (`httpsswapi.py4e.comapifilms1`), ignoring the user's input (`movieId`).
+3. The folder `movie_details` must exist before running the program; otherwise, saving files will fail.
+
+### Conclusion
+This program demonstrates a basic use case of fetching and processing API data in Java. However, it has some issues that need fixing (e.g., dynamic URL generation). It also showcases modern Java features like records and HTTP clients effectively.
